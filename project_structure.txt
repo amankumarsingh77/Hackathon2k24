@@ -1,0 +1,19 @@
+plagiarism_detector/
+├── app/
+│   ├── __init__.py
+│   ├── routes/
+│   │   └── __init__.py
+│   ├── models/
+│   │   └── __init__.py
+│   ├── services/
+│   │   └── __init__.py
+│   ├── templates/
+│   │   └── base.html
+│   └── static/
+│       ├── css/
+│       └── js/
+├── tests/
+│   └── __init__.py
+├── config.py
+├── requirements.txt
+└── run.py 
