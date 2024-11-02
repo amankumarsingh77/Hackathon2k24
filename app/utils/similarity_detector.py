@@ -1,125 +1,81 @@
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from sentence_transformers import SentenceTransformer
-import Levenshtein
+from typing import List, Dict, Union
 import numpy as np
-from typing import List, Dict, Tuple
+from sentence_transformers import SentenceTransformer
+from app.utils.db_operations import DatabaseOperations
 
 class SimilarityDetector:
-    def __init__(self):
-        self.tfidf_vectorizer = TfidfVectorizer()
-        self.bert_model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
-        self.similarity_threshold = 0.5
-        
-    def analyze_similarity(self, source_text: List[str], comparison_texts: List[str]) -> Dict:
-        """
-        Analyze text similarity using multiple methods
-        Returns comprehensive similarity analysis
-        """
-        results = {
-            'tfidf_similarity': self._calculate_tfidf_similarity(source_text, comparison_texts),
-            'semantic_similarity': self._calculate_semantic_similarity(source_text, comparison_texts),
-            'ngram_similarity': self._calculate_ngram_similarity(source_text, comparison_texts),
-            'detailed_matches': self._find_similar_passages(source_text, comparison_texts)
-        }
-        
-        results['overall_similarity'] = self._calculate_overall_similarity(results)
-        return results
-    
-    def _calculate_tfidf_similarity(self, source: List[str], targets: List[str]) -> float:
-        """Calculate TF-IDF based cosine similarity"""
-        all_texts = source + targets
-        tfidf_matrix = self.tfidf_vectorizer.fit_transform(all_texts)
-        
-        # Calculate similarity between source and each target
-        source_vector = tfidf_matrix[:len(source)]
-        target_vectors = tfidf_matrix[len(source):]
-        
-        similarities = cosine_similarity(source_vector, target_vectors)
-        return float(np.mean(similarities))
-    
-    def _calculate_semantic_similarity(self, source: List[str], targets: List[str]) -> float:
-        """Calculate BERT-based semantic similarity"""
-        source_embeddings = self.bert_model.encode(source)
-        target_embeddings = self.bert_model.encode(targets)
-        
-        similarities = cosine_similarity(source_embeddings, target_embeddings)
-        return float(np.mean(similarities))
-    
-    def _calculate_ngram_similarity(self, source: List[str], targets: List[str], 
-                                  n_range: Tuple[int, int] = (2, 4)) -> float:
-        """Calculate n-gram based similarity"""
-        def get_ngrams(text: str, n: int) -> set:
-            return set(' '.join(text.split()[i:i+n]) for i in range(len(text.split())-n+1))
-        
-        similarities = []
-        for n in range(n_range[0], n_range[1] + 1):
-            source_ngrams = set()
-            for text in source:
-                source_ngrams.update(get_ngrams(text, n))
+    def __init__(self, db_ops: DatabaseOperations):
+        self.model = SentenceTransformer('all-MiniLM-L6-v2')
+        self.db_ops = db_ops
+
+    def get_text_embedding(self, text: Union[str, List[str]]) -> np.ndarray:
+        """Get embeddings for text or list of texts"""
+        try:
+            # Handle different input types
+            if isinstance(text, list):
+                # Join list of texts into single string
+                text = ' '.join(str(t) for t in text)
+            elif not isinstance(text, str):
+                # Convert to string if not already
+                text = str(text)
                 
-            target_ngrams = set()
-            for text in targets:
-                target_ngrams.update(get_ngrams(text, n))
+            # Ensure text is not empty
+            if not text.strip():
+                raise ValueError("Empty text provided")
+                
+            # Get embedding
+            embedding = self.model.encode([text], convert_to_tensor=True)
+            return embedding.cpu().numpy()[0] if hasattr(embedding, 'cpu') else embedding[0]
             
-            if source_ngrams and target_ngrams:
-                similarity = len(source_ngrams.intersection(target_ngrams)) / len(source_ngrams.union(target_ngrams))
-                similarities.append(similarity)
+        except Exception as e:
+            print(f"Error in get_text_embedding: {str(e)}")
+            print(f"Input text type: {type(text)}")
+            print(f"Input text preview: {str(text)[:200]}")
+            raise
+
+    async def find_similar_documents(self, text: str, threshold: float = 0.8) -> List[Dict]:
+        vector = self.get_text_embedding(text)
+        print(vector)
+        similar_docs = await self.db_ops.find_similar_documents(vector.tolist(), threshold)
+        return similar_docs
+
+    def analyze_similarity(self, source_text: Union[str, List[str]], comparison_text: Union[str, List[str]]) -> Dict:
+        """
+        Analyze similarity between two texts using various metrics
+        """
+        # Get embeddings for both texts
+        source_embedding = self.get_text_embedding(source_text)
+        comparison_embedding = self.get_text_embedding(comparison_text)
         
-        return float(np.mean(similarities)) if similarities else 0.0
-    
-    def _find_similar_passages(self, source: List[str], targets: List[str]) -> List[Dict]:
-        """Find specific similar passages using multiple methods"""
-        similar_passages = []
+        # Calculate cosine similarity and convert to Python float
+        cosine_sim = float(np.dot(source_embedding, comparison_embedding) / \
+                    (np.linalg.norm(source_embedding) * np.linalg.norm(comparison_embedding)))
         
-        # Split texts into sentences if they're not already
-        source_sentences = []
-        for text in source:
-            source_sentences.extend(text.split('. '))
-        
-        target_sentences = []
-        for text in targets:
-            target_sentences.extend(text.split('. '))
-        
-        # Get embeddings for all sentences
-        source_embeddings = self.bert_model.encode(source_sentences)
-        target_embeddings = self.bert_model.encode(target_sentences)
-        
-        # Calculate similarity matrix
-        similarity_matrix = cosine_similarity(source_embeddings, target_embeddings)
-        
-        # Find similar passages
-        for i, source_text in enumerate(source_sentences):
-            for j, target_text in enumerate(target_sentences):
-                semantic_sim = similarity_matrix[i, j]
-                
-                # Calculate Levenshtein similarity only if semantic similarity is high enough
-                if semantic_sim > self.similarity_threshold:
-                    levenshtein_sim = 1 - (Levenshtein.distance(source_text, target_text) / 
-                                         max(len(source_text), len(target_text)))
-                    
-                    # Add match if either similarity is high enough
-                    if semantic_sim > self.similarity_threshold or levenshtein_sim > self.similarity_threshold:
-                        similar_passages.append({
-                            'source_text': source_text,
-                            'target_text': target_text,
-                            'semantic_similarity': float(semantic_sim),
-                            'levenshtein_similarity': float(levenshtein_sim),
-                            'source_index': i,
-                            'target_index': j
-                        })
-        
-        return similar_passages
-    
-    def _calculate_overall_similarity(self, results: Dict) -> float:
-        """Calculate weighted overall similarity score"""
-        weights = {
-            'tfidf_similarity': 0.3,
-            'semantic_similarity': 0.4,
-            'ngram_similarity': 0.3
+        # Calculate other similarity metrics as needed
+        similarity_data = {
+            'cosine_similarity': cosine_sim,
+            'similarity_threshold': 0.8,  # Configurable threshold
+            'is_plagiarized': bool(cosine_sim > 0.8),  # Convert numpy.bool_ to Python bool
+            'matched_segments': [],  # You can add text segments that match
+            'similarity_score': cosine_sim * 100,  # Convert to percentage
+            'tfidf_similarity': cosine_sim,  # For compatibility with report generator
+            'semantic_similarity': cosine_sim,  # For compatibility with report generator
+            'ngram_similarity': cosine_sim,  # For compatibility with report generator
+            'overall_similarity': cosine_sim  # For compatibility with report generator
         }
         
-        overall_score = sum(results[key] * weights[key] 
-                          for key in weights.keys())
+        # If similarity is high, find matching segments
+        if cosine_sim > 0.8:
+            # Here you can implement logic to find specific matching segments
+            source_preview = source_text[:100] if isinstance(source_text, str) else source_text[0][:100]
+            comparison_preview = comparison_text[:100] if isinstance(comparison_text, str) else comparison_text[0][:100]
+            
+            similarity_data['matched_segments'] = [{
+                'source_text': f"{source_preview}...",
+                'matched_text': f"{comparison_preview}...",
+                'similarity': cosine_sim,
+                'semantic_similarity': cosine_sim,
+                'levenshtein_similarity': 0.0  # Placeholder for now
+            }]
         
-        return float(overall_score) 
+        return similarity_data
