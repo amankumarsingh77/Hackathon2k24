@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Similarity Analysis Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .results-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .score-card {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .score-card.low {
+            background-color: #e8f5e9;
+            border: 1px solid #81c784;
+        }
+        .score-card.medium {
+            background-color: #fff3e0;
+            border: 1px solid #ffb74d;
+        }
+        .score-card.high {
+            background-color: #ffebee;
+            border: 1px solid #e57373;
+        }
+        .score-value {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        .match-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        .match-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .similarity-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e0e0e0;
+            margin: 0.5rem 0;
+        }
+        .similarity-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+        .text-comparison {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 0.2rem;
+            border-radius: 3px;
+        }
+        .action-buttons {
+            margin-top: 2rem;
+            text-align: center;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-5 mb-5">
+        <div class="results-container">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item active">Similarity Results</li>
+                </ol>
+            </nav>
+
+            <h2 class="mb-4">Similarity Analysis Results</h2>
+            
+            <!-- Document Info -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Document Information</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Filename:</strong> {{ target_document.filename }}</p>
+                            <p><strong>Analysis Date:</strong> {{ similarity_result.created_at|datetime }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>File Type:</strong> {{ target_document.file_type.upper() }}</p>
+                            <p><strong>Document ID:</strong> {{ target_document.id }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overall Score -->
+            {% set score = similarity_result.similarity_data.similarity_score %}
+            <div class="score-card {% if score < 30 %}low{% elif score < 70 %}medium{% else %}high{% endif %}">
+                <h4>Overall Similarity Score</h4>
+                <div class="score-value">{{ "%.1f"|format(score) }}%</div>
+                <p class="mb-0">
+                    {% if score < 30 %}
+                        <i class="bi bi-check-circle-fill text-success"></i> Low similarity detected
+                    {% elif score < 70 %}
+                        <i class="bi bi-exclamation-triangle-fill text-warning"></i> Moderate similarity detected
+                    {% else %}
+                        <i class="bi bi-exclamation-circle-fill text-danger"></i> High similarity detected
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Detailed Stats -->
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <i class="bi bi-graph-up mb-2" style="font-size: 1.5rem;"></i>
+                    <h5>Sentence Similarity</h5>
+                    <p class="mb-0">{{ "%.1f"|format(similarity_result.similarity_data.sentence_similarity * 100) }}%</p>
+                </div>
+                <div class="stat-item">
+                    <i class="bi bi-intersect mb-2" style="font-size: 1.5rem;"></i>
+                    <h5>Document Similarity</h5>
+                    <p class="mb-0">{{ "%.1f"|format(similarity_result.similarity_data.document_similarity * 100) }}%</p>
+                </div>
+                <div class="stat-item">
+                    <i class="bi bi-file-text mb-2" style="font-size: 1.5rem;"></i>
+                    <h5>TF-IDF Similarity</h5>
+                    <p class="mb-0">{{ "%.1f"|format(similarity_result.similarity_data.tfidf_similarity * 100) }}%</p>
+                </div>
+            </div>
+
+            <!-- Similarity Breakdown -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Similarity Breakdown</h5>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h6>Exact Matches</h6>
+                                <p>{{ similarity_result.similarity_data.similarity_breakdown.exact_matches }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h6>High Similarity</h6>
+                                <p>{{ similarity_result.similarity_data.similarity_breakdown.high_similarity }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h6>Moderate Similarity</h6>
+                                <p>{{ similarity_result.similarity_data.similarity_breakdown.moderate_similarity }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h6>Low Similarity</h6>
+                                <p>{{ similarity_result.similarity_data.similarity_breakdown.low_similarity }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Similar Documents -->
+            <h4 class="mb-3">Similar Documents Found</h4>
+            {% for doc in similarity_result.similar_documents %}
+            <div class="match-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="mb-2">{{ doc.filename }}</h5>
+                        <p class="text-muted mb-2">Document ID: {{ doc.id }}</p>
+                    </div>
+                    <span class="badge bg-primary">{{ "%.1f"|format(doc.score) }}% Match</span>
+                </div>
+                
+                <div class="similarity-bar">
+                    <div class="similarity-fill bg-primary" style="width: {{ doc.score }}%"></div>
+                </div>
+                
+                {% if doc.matched_segments %}
+                <div class="text-comparison">
+                    <h6>Sample Matched Content:</h6>
+                    {% for segment in doc.matched_segments[:3] %}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted">Original Text:</small>
+                            <p class="highlight">{{ segment.source_text }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted">Similar Text:</small>
+                            <p class="highlight">{{ segment.matched_text }}</p>
+                            <small class="text-muted">Similarity: {{ "%.1f"|format(segment.similarity * 100) }}%</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="/generate-report/{{ target_document.id }}" class="btn btn-primary me-2">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>Generate Detailed Report
+                </a>
+                <a href="/" class="btn btn-outline-secondary">
+                    <i class="bi bi-upload me-2"></i>Check Another Document
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

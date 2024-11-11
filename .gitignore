@@ -10,8 +10,12 @@ venv/
 build/
 develop-eggs/
 dist/
+reports/
+processed/
+document_store/
 downloads/
 eggs/
+vector_db/
 .eggs/
 lib/
 lib64/

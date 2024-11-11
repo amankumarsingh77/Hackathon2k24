@@ -3,28 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Research Paper Upload</title>
+    <title>Document Similarity Checker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .upload-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .drag-area {
+            border: 2px dashed #4a90e2;
+            border-radius: 5px;
+            padding: 2rem;
+            text-align: center;
+            background-color: #f8faff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .drag-area:hover {
+            background-color: #f0f4ff;
+            border-color: #357abd;
+        }
+        .file-info {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .upload-icon {
+            font-size: 3rem;
+            color: #4a90e2;
+            margin-bottom: 1rem;
+        }
+        .features-list {
+            margin-top: 2rem;
+        }
+        .feature-item {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: start;
+        }
+        .feature-icon {
+            color: #28a745;
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+        #uploadProgress {
+            display: none;
+            margin-top: 1rem;
+        }
+        .alert {
+            display: none;
+            margin-top: 1rem;
+        }
+    </style>
 </head>
-<body>
-    <div class="container mt-5">
-        <h2>Upload Research Paper</h2>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <form method="POST" enctype="multipart/form-data" class="mt-4">
-            <div class="mb-3">
-                <label for="file" class="form-label">Select Document</label>
-                <input type="file" class="form-control" id="file" name="file" accept=".pdf,.doc,.docx,.txt" required>
-                <div class="form-text">Supported formats: PDF, DOC, DOCX, TXT</div>
+<body class="bg-light">
+    <div class="container mt-5 mb-5">
+        <div class="upload-container">
+            <h2 class="text-center mb-4">Document Similarity Checker</h2>
+            <p class="text-muted text-center mb-4">Upload your document to check for similarities with our database</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form id="uploadForm" method="POST" enctype="multipart/form-data" class="mb-4">
+                <div class="drag-area" id="dragArea">
+                    <i class="bi bi-cloud-upload upload-icon"></i>
+                    <h4>Drag & Drop your file here</h4>
+                    <p class="text-muted">or</p>
+                    <input type="file" class="form-control" id="file" name="file" accept=".pdf,.doc,.docx,.txt" hidden>
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('file').click()">
+                        Browse Files
+                    </button>
+                </div>
+
+                <div id="fileInfo" class="file-info" style="display: none;">
+                    <h5>Selected File:</h5>
+                    <p id="fileName" class="mb-0"></p>
+                    <p id="fileSize" class="text-muted"></p>
+                </div>
+
+                <div class="progress" id="uploadProgress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"></div>
+                </div>
+
+                <div class="alert alert-success" id="successAlert">
+                    File uploaded successfully! Processing...
+                </div>
+
+                <div class="alert alert-danger" id="errorAlert">
+                    An error occurred during upload.
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mt-3" id="uploadButton" disabled>
+                    Upload and Check Similarity
+                </button>
+            </form>
+
+            <div class="features-list">
+                <h5 class="mb-3">Features:</h5>
+                <div class="feature-item">
+                    <i class="bi bi-check-circle-fill feature-icon"></i>
+                    <div>
+                        <strong>Advanced Similarity Detection</strong>
+                        <p class="text-muted mb-0">Using state-of-the-art vector embeddings for accurate content matching</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <i class="bi bi-shield-check feature-icon"></i>
+                    <div>
+                        <strong>Supported Formats</strong>
+                        <p class="text-muted mb-0">PDF, DOC, DOCX, and TXT files (Max size: 16MB)</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <i class="bi bi-graph-up feature-icon"></i>
+                    <div>
+                        <strong>Detailed Analysis</strong>
+                        <p class="text-muted mb-0">Get comprehensive similarity scores and matched content segments</p>
+                    </div>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary">Upload</button>
-        </form>
+        </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const dragArea = document.getElementById('dragArea');
+        const fileInput = document.getElementById('file');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const uploadButton = document.getElementById('uploadButton');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+
+        // Drag and drop handlers
+        dragArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dragArea.style.backgroundColor = '#e6eeff';
+        });
+
+        dragArea.addEventListener('dragleave', () => {
+            dragArea.style.backgroundColor = '#f8faff';
+        });
+
+        dragArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragArea.style.backgroundColor = '#f8faff';
+            const file = e.dataTransfer.files[0];
+            handleFile(file);
+        });
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            handleFile(file);
+        });
+
+        function handleFile(file) {
+            if (file) {
+                const validTypes = ['.pdf', '.doc', '.docx', '.txt'];
+                const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                
+                if (validTypes.includes(fileExtension)) {
+                    fileName.textContent = file.name;
+                    fileSize.textContent = formatFileSize(file.size);
+                    fileInfo.style.display = 'block';
+                    uploadButton.disabled = false;
+                } else {
+                    alert('Invalid file type. Please upload PDF, DOC, DOCX, or TXT files only.');
+                    fileInput.value = '';
+                    fileInfo.style.display = 'none';
+                    uploadButton.disabled = true;
+                }
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Form submission handler
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            uploadButton.disabled = true;
+            uploadProgress.style.display = 'block';
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+
+            try {
+                const response = await fetch('/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    successAlert.style.display = 'block';
+                    // Redirect to similarity results page
+                    if (result.redirect_url) {
+                        window.location.href = result.redirect_url;
+                    }
+                } else {
+                    throw new Error(result.message || 'Upload failed');
+                }
+            } catch (error) {
+                errorAlert.textContent = error.message;
+                errorAlert.style.display = 'block';
+                uploadButton.disabled = false;
+            } finally {
+                uploadProgress.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html> 

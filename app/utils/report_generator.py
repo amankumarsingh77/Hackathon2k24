@@ -50,7 +50,7 @@ class ReportGenerator:
                 'charts': charts,
                 'generated_at': datetime.now().isoformat(),
                 'highlighted_text': self._generate_text_highlights(
-                    similarity_data.get('detailed_matches', [])
+                    similarity_data.get('matched_segments', [])
                 )
             }
             
@@ -69,16 +69,15 @@ class ReportGenerator:
             response = {
                 'report_id': report_id,
                 'html_path': html_path,
+                'pdf_path': pdf_path,
                 'summary': self._generate_summary(report_data)
             }
-            
-            if pdf_path:
-                response['pdf_path'] = pdf_path
             
             return response
             
         except Exception as e:
-            raise Exception(f"Error generating report: {str(e)}")
+            logging.error(f"Error generating report: {str(e)}")
+            raise
     
     def _generate_charts(self, similarity_data: Dict) -> Dict:
         """Generate visualization charts"""
@@ -89,8 +88,8 @@ class ReportGenerator:
             plt.figure(figsize=(8, 6))
             scores = [
                 ('TF-IDF', similarity_data['tfidf_similarity']),
-                ('Semantic', similarity_data['semantic_similarity']),
-                ('N-gram', similarity_data['ngram_similarity']),
+                ('Sentence', similarity_data['sentence_similarity']),
+                ('Document', similarity_data['document_similarity']),
                 ('Overall', similarity_data['overall_similarity'])
             ]
             
@@ -115,10 +114,9 @@ class ReportGenerator:
         for match in matches:
             highlighted_matches.append({
                 'source': match['source_text'],
-                'target': match['target_text'],
-                'similarity': match['semantic_similarity'],
-                'type': 'semantic' if match['semantic_similarity'] > match['levenshtein_similarity']
-                        else 'exact'
+                'target': match['matched_text'],
+                'similarity': match['similarity'],
+                'type': 'high' if match['similarity'] > 0.8 else 'moderate'
             })
         return highlighted_matches
     
@@ -178,6 +176,6 @@ class ReportGenerator:
         return {
             'document_name': report_data['document']['name'],
             'overall_similarity': report_data['similarity']['overall_similarity'],
-            'matched_passages': len(report_data['similarity']['detailed_matches']),
+            'matched_passages': len(report_data['similarity'].get('matched_segments', [])),
             'generated_at': report_data['generated_at']
         } 
