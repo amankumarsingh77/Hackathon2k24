@@ -15,7 +15,7 @@ class WebSourceManager:
     async def search_academic_sources(self, query: str, limit: int = 5) -> Dict:
         """Search multiple academic sources concurrently"""
         try:
-            # Run API searches concurrently
+            
             scholarly_task = asyncio.create_task(
                 asyncio.to_thread(self.scholarly_api.search_papers, query, limit)
             )
@@ -23,7 +23,7 @@ class WebSourceManager:
                 self.semantic_scholar_api.search_papers(query, limit)
             )
             
-            # Wait for results
+            
             scholarly_results, semantic_results = await asyncio.gather(
                 scholarly_task,
                 semantic_task

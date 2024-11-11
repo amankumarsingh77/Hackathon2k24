@@ -19,26 +19,26 @@ class WebScraper:
     def scrape_url(self, url: str) -> Optional[str]:
         """Scrape content from a given URL with caching"""
         try:
-            # Check cache first
+            
             if self.redis_client:
                 cached_content = self.redis_client.get(url)
                 if cached_content:
                     return cached_content.decode('utf-8')
             
-            # Make request with proper headers
+            
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
             response = requests.get(url, headers=headers, timeout=10)
             response.raise_for_status()
             
-            # Parse content
+            
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Extract main content (customize based on needs)
+            
             content = self._extract_main_content(soup)
             
-            # Cache the result
+            
             if self.redis_client and content:
                 self.redis_client.setex(
                     url,
@@ -54,15 +54,15 @@ class WebScraper:
     
     def _extract_main_content(self, soup: BeautifulSoup) -> str:
         """Extract main content from webpage"""
-        # Remove unwanted elements
+        
         for element in soup(['script', 'style', 'nav', 'header', 'footer']):
             element.decompose()
         
-        # Find main content (customize based on common webpage structures)
+        
         main_content = soup.find('main') or soup.find('article') or soup.find('div', class_='content')
         
         if main_content:
             return main_content.get_text(separator=' ', strip=True)
         
-        # Fallback to body content
+        
         return soup.get_text(separator=' ', strip=True) 

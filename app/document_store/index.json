@@ -785,5 +785,25 @@
             "total_sentences": 94
         },
         "file_path": "af1d7373-0258-41b6-8b99-d245506820b1.json"
+    },
+    "761e72b0-7ab4-4c2e-9f18-ba0fefde1b3b": {
+        "id": "761e72b0-7ab4-4c2e-9f18-ba0fefde1b3b",
+        "added_at": "2024-11-11T20:42:12.067636",
+        "metadata": {
+            "original_file": "app/uploads/20241111_204210_ContCommRTD_A_Distributed_Content-Based_Misinforma.pdf",
+            "processed_at": "2024-11-11T20:42:12.067405",
+            "total_sentences": 511
+        },
+        "file_path": "761e72b0-7ab4-4c2e-9f18-ba0fefde1b3b.json"
+    },
+    "530c730b-2644-4622-9afe-0ffe59929423": {
+        "id": "530c730b-2644-4622-9afe-0ffe59929423",
+        "added_at": "2024-11-11T20:47:01.666725",
+        "metadata": {
+            "original_file": "app/uploads/20241111_204659_Integrating_Advanced_Machine_Learning_Techniques_for_Multi_Class.pdf",
+            "processed_at": "2024-11-11T20:47:01.665744",
+            "total_sentences": 160
+        },
+        "file_path": "530c730b-2644-4622-9afe-0ffe59929423.json"
     }
 }

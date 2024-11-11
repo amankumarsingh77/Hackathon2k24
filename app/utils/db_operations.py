@@ -25,7 +25,7 @@ class DatabaseOperations:
     async def find_similar_documents(self, vector: List[float], threshold: float = 0.8) -> List[Dict]:
         """Find similar documents using vector similarity"""
         try:
-            # Get all documents
+            
             cursor = self.db.documents.find({}, {
                 "filename": 1,
                 "content": 1,
@@ -33,13 +33,13 @@ class DatabaseOperations:
                 "file_type": 1,
                 "created_at": 1
             })
-            documents = await cursor.to_list(length=100)  # Limit to 100 docs for now
+            documents = await cursor.to_list(length=100)  
             
-            # Calculate similarities
+            
             similar_docs = []
             for doc in documents:
                 if "content_vector" in doc:
-                    # Calculate cosine similarity
+                    
                     doc_vector = doc["content_vector"]
                     similarity = float(np.dot(vector, doc_vector) / 
                                     (np.linalg.norm(vector) * np.linalg.norm(doc_vector)))
@@ -48,10 +48,10 @@ class DatabaseOperations:
                         doc["score"] = similarity
                         similar_docs.append(doc)
             
-            # Sort by similarity score
+            
             similar_docs.sort(key=lambda x: x["score"], reverse=True)
             
-            return similar_docs[:10]  # Return top 10 similar documents
+            return similar_docs[:10]  
             
         except Exception as e:
             print(f"Error in find_similar_documents: {str(e)}")
@@ -107,7 +107,7 @@ class DatabaseOperations:
             pipeline = [
                 {
                     "$search": {
-                        "index": "default",  # Use your index name here
+                        "index": "default",  
                         "knnBeta": {
                             "vector": vector,
                             "path": "content_vector",

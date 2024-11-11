@@ -4,10 +4,10 @@ from datetime import datetime
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'your-secret-key-here'  # Change this in production
-    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+    app.config['SECRET_KEY'] = 'your-secret-key-here'  
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  
     
-    # Add custom datetime filter
+    
     @app.template_filter('datetime')
     def format_datetime(value):
         if isinstance(value, str):

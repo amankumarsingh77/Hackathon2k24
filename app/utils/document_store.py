@@ -32,7 +32,7 @@ class DocumentStore:
         """Add a processed document to the store"""
         index = self._load_index()
         
-        # Create document entry
+        
         doc_entry = {
             'id': doc_id,
             'added_at': datetime.now().isoformat(),
@@ -40,7 +40,7 @@ class DocumentStore:
             'file_path': f"{doc_id}.json"
         }
         
-        # Save document content
+        
         doc_path = os.path.join(self.store_dir, doc_entry['file_path'])
         with open(doc_path, 'w') as f:
             json.dump({
@@ -48,7 +48,7 @@ class DocumentStore:
                 'metadata': metadata
             }, f, indent=4)
         
-        # Update index
+        
         index[doc_id] = doc_entry
         self._save_index(index)
         

@@ -7,7 +7,7 @@ from bson import ObjectId
 class VectorStore:
     def __init__(self, db: AsyncIOMotorDatabase):
         self.db = db
-        self.dimension = 384  # dimension of all-MiniLM-L6-v2 embeddings
+        self.dimension = 384  
 
     async def add_document(self, doc_id: str, vector: list, metadata: dict, text_content: str):
         """Add document to MongoDB with vector embedding"""
@@ -29,11 +29,11 @@ class VectorStore:
             pipeline = [
                 {
                     "$search": {
-                        "index": "vector_index",  # Make sure this index exists
+                        "index": "vector_index",  
                         "knnBeta": {
                             "vector": query_vector,
                             "path": "content_vector",
-                            "k": k * 2,  # Get more results initially for better filtering
+                            "k": k * 2,  
                         }
                     }
                 },
@@ -50,7 +50,7 @@ class VectorStore:
             cursor = self.db.documents.aggregate(pipeline)
             results = await cursor.to_list(length=k * 2)
             
-            # Post-process results
+            
             similar_docs = []
             seen_docs = set()
             
@@ -59,7 +59,7 @@ class VectorStore:
                 if doc_id in seen_docs:
                     continue
                 
-                # Calculate cosine similarity for more accurate scoring
+                
                 similarity_score = float(np.dot(query_vector, doc['content_vector']) / 
                                       (np.linalg.norm(query_vector) * np.linalg.norm(doc['content_vector'])))
                 
@@ -79,7 +79,7 @@ class VectorStore:
             
         except Exception as e:
             print(f"Error in vector search: {str(e)}")
-            # Fallback to basic similarity search if vector search fails
+            
             return await self._fallback_similarity_search(query_vector, k, threshold)
 
     async def _fallback_similarity_search(self, query_vector: list, k: int = 5, threshold: float = 0.8) -> List[Dict]:
@@ -90,7 +90,7 @@ class VectorStore:
             'content_vector': 1
         })
         
-        documents = await cursor.to_list(length=100)  # Limit to prevent memory issues
+        documents = await cursor.to_list(length=100)  
         similar_docs = []
         
         for doc in documents:
@@ -106,7 +106,7 @@ class VectorStore:
                         'content': doc['content']
                     })
         
-        # Sort by similarity score and return top k
+        
         similar_docs.sort(key=lambda x: x['score'], reverse=True)
         return similar_docs[:k]
 

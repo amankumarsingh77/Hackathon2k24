@@ -21,11 +21,11 @@ class FileHandler:
     
     @staticmethod
     def validate_file_type(file):
-        # Read the file content
-        file_content = file.read()
-        file.seek(0)  # Reset file pointer
         
-        # For txt files (filetype doesn't detect txt files)
+        file_content = file.read()
+        file.seek(0)  
+        
+        
         if file.filename.endswith('.txt'):
             try:
                 file_content.decode('utf-8')
@@ -33,15 +33,15 @@ class FileHandler:
             except:
                 return False
         
-        # For other file types
+        
         kind = filetype.guess(file_content)
         if kind is None:
             return False
             
         valid_mimes = {
-            'application/pdf',  # PDF
-            'application/msword',  # DOC
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'  # DOCX
+            'application/pdf',  
+            'application/msword',  
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'  
         }
         
         return kind.mime in valid_mimes
@@ -49,11 +49,11 @@ class FileHandler:
     def process_file(self, file_path):
         """Process the uploaded file"""
         try:
-            # Extract and process text
+            
             raw_text = self.text_processor.extract_text(file_path)
             processed_sentences = self.text_processor.preprocess_text(raw_text)
             
-            # Store the processed document
+            
             doc_id = str(uuid.uuid4())
             metadata = {
                 'original_file': file_path,
@@ -62,10 +62,10 @@ class FileHandler:
             }
             self.document_store.add_document(doc_id, processed_sentences, metadata)
             
-            # Save processed text
+            
             processed_file_path = self._save_processed_text(file_path, processed_sentences)
             
-            # Return only current file information
+            
             return {
                 'status': 'success',
                 'message': 'File processed successfully',

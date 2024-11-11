@@ -19,18 +19,18 @@ class SimilarityDetector:
     def get_text_embedding(self, text: Union[str, List[str]]) -> np.ndarray:
         """Get embeddings with batching and better error handling"""
         try:
-            # Normalize input
+            
             if isinstance(text, list):
                 texts = [str(t) for t in text]
             else:
                 texts = [str(text)]
 
-            # Remove empty texts
+            
             texts = [t.strip() for t in texts if t.strip()]
             if not texts:
                 raise ValueError("No valid text provided")
 
-            # Process in batches
+            
             embeddings = []
             for i in range(0, len(texts), self.batch_size):
                 batch = texts[i:i + self.batch_size]
@@ -43,7 +43,7 @@ class SimilarityDetector:
                 )
                 embeddings.append(batch_embedding.cpu().numpy())
 
-            # Combine results
+            
             final_embedding = np.vstack(embeddings) if len(embeddings) > 1 else embeddings[0]
             return final_embedding.mean(axis=0) if len(texts) > 1 else final_embedding[0]
 
@@ -53,15 +53,15 @@ class SimilarityDetector:
 
     def analyze_similarity(self, source_text: Union[str, List[str]], comparison_text: Union[str, List[str]]) -> Dict:
         """Enhanced similarity analysis with multiple metrics"""
-        # Ensure texts are strings
+        
         source_text = ' '.join(source_text) if isinstance(source_text, list) else source_text
         comparison_text = ' '.join(comparison_text) if isinstance(comparison_text, list) else comparison_text
 
-        # Get sentence-level embeddings
+        
         source_sentences = sent_tokenize(source_text)
         comparison_sentences = sent_tokenize(comparison_text)
 
-        # Calculate sentence-level similarities
+        
         sentence_similarities = []
         for src_sent in source_sentences:
             src_emb = self.get_text_embedding(src_sent)
@@ -75,18 +75,18 @@ class SimilarityDetector:
                 best_similarity = max(best_similarity, similarity)
             sentence_similarities.append(best_similarity)
 
-        # Calculate different similarity metrics
-        # 1. Average sentence-level similarity
+        
+        
         avg_sent_similarity = np.mean(sentence_similarities)
 
-        # 2. TF-IDF similarity
+        
         try:
             tfidf_matrix = self.tfidf_vectorizer.fit_transform([source_text, comparison_text])
             tfidf_similarity = float((tfidf_matrix * tfidf_matrix.T).A[0][1])
         except:
             tfidf_similarity = 0.0
 
-        # 3. Overall document embeddings similarity
+        
         source_embedding = self.get_text_embedding(source_text)
         comparison_embedding = self.get_text_embedding(comparison_text)
         doc_similarity = float(util.cos_sim(
@@ -94,14 +94,14 @@ class SimilarityDetector:
             torch.tensor(comparison_embedding)
         ).cpu().numpy()[0])
 
-        # Combine metrics with weights
+        
         overall_similarity = (
-            0.4 * avg_sent_similarity +  # Sentence-level similarity
-            0.3 * tfidf_similarity +     # Local text features
-            0.3 * doc_similarity         # Global document similarity
+            0.4 * avg_sent_similarity +  
+            0.3 * tfidf_similarity +     
+            0.3 * doc_similarity         
         )
 
-        # Find matching segments
+        
         matched_segments = self._find_matching_segments(
             source_sentences, 
             comparison_sentences,
@@ -148,7 +148,7 @@ class SimilarityDetector:
                         'match_index': j
                     })
         
-        # Sort matches by similarity score
+        
         matches.sort(key=lambda x: x['similarity'], reverse=True)
         
-        return matches[:10]  # Return top 10 matches
+        return matches[:10]  

@@ -9,7 +9,7 @@ import io
 import base64
 import logging
 import matplotlib
-matplotlib.use('Agg')  # Use non-interactive backend
+matplotlib.use('Agg')  
 import atexit
 
 class ReportGenerator:
@@ -20,7 +20,7 @@ class ReportGenerator:
         self.logger = logging.getLogger(__name__)
         self._ensure_directories()
         
-        # Register cleanup
+        
         atexit.register(self._cleanup)
     
     def _cleanup(self):
@@ -39,10 +39,10 @@ class ReportGenerator:
                        web_sources: Optional[Dict] = None) -> Dict:
         """Generate comprehensive plagiarism report"""
         try:
-            # Generate visualizations
+            
             charts = self._generate_charts(similarity_data)
             
-            # Prepare report data
+            
             report_data = {
                 'document': document_info,
                 'similarity': similarity_data,
@@ -54,12 +54,12 @@ class ReportGenerator:
                 )
             }
             
-            # Generate report in different formats
+            
             report_id = f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
             
             html_path = self._save_html_report(report_id, report_data)
             
-            # Try to generate PDF, but continue if it fails
+            
             try:
                 pdf_path = self._generate_pdf(html_path, report_id)
             except Exception as e:
@@ -84,7 +84,7 @@ class ReportGenerator:
         charts = {}
         
         try:
-            # Similarity score distribution
+            
             plt.figure(figsize=(8, 6))
             scores = [
                 ('TF-IDF', similarity_data['tfidf_similarity']),
@@ -97,14 +97,14 @@ class ReportGenerator:
             plt.title('Similarity Scores Distribution')
             plt.ylabel('Similarity Score')
             
-            # Convert plot to base64 image
+            
             buffer = io.BytesIO()
             plt.savefig(buffer, format='png')
             buffer.seek(0)
             charts['similarity_distribution'] = base64.b64encode(buffer.read()).decode()
             
         finally:
-            plt.close('all')  # Ensure figure is closed
+            plt.close('all')  
             
         return charts
     
@@ -136,7 +136,7 @@ class ReportGenerator:
         pdf_path = os.path.join(self.report_dir, 'pdf', f'{report_id}.pdf')
         
         try:
-            # Configure PDF options
+            
             options = {
                 'page-size': 'A4',
                 'margin-top': '0.75in',
@@ -146,12 +146,12 @@ class ReportGenerator:
                 'encoding': 'UTF-8'
             }
             
-            # Try to find wkhtmltopdf in common locations
+            
             wkhtmltopdf_paths = [
-                'wkhtmltopdf',  # System PATH
-                r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe',  # Windows
-                '/usr/local/bin/wkhtmltopdf',  # Unix/Linux
-                '/usr/bin/wkhtmltopdf'  # Unix/Linux alternative
+                'wkhtmltopdf',  
+                r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe',  
+                '/usr/local/bin/wkhtmltopdf',  
+                '/usr/bin/wkhtmltopdf'  
             ]
             
             config = None

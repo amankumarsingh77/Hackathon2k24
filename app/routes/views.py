@@ -15,13 +15,13 @@ import logging
 file_handler = FileHandler()
 document_store = DocumentStore()
 
-# Initialize database and detector
+
 async def init_detector():
     db = await get_async_db()
     db_ops = DatabaseOperations(db)
     return SimilarityDetector(db_ops)
 
-# Get event loop and create detector instance
+
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 similarity_detector = loop.run_until_complete(init_detector())
@@ -51,23 +51,23 @@ def init_routes(app):
                 }), 400
             
             try:
-                # Save and process the file
+                
                 file_path = file_handler.save_file(file)
                 processed_result = file_handler.process_file(file_path)
                 
-                # Extract content from processed result
+                
                 if isinstance(processed_result, dict):
                     if 'file_info' in processed_result:
-                        # Get the processed file path and ensure it's relative to app directory
+                        
                         processed_file_name = os.path.basename(processed_result['file_info']['processed_file'])
                         processed_file_path = os.path.join('app', 'processed', processed_file_name)
                         
-                        # Read the processed text file
+                        
                         try:
                             with open(processed_file_path, 'r', encoding='utf-8') as f:
                                 text_content = f.read()
                         except FileNotFoundError:
-                            # Try alternate path
+                            
                             processed_file_path = os.path.join('processed', processed_file_name)
                             with open(processed_file_path, 'r', encoding='utf-8') as f:
                                 text_content = f.read()
@@ -76,31 +76,31 @@ def init_routes(app):
                 else:
                     text_content = processed_result
                 
-                # Ensure text_content is a string
+                
                 if isinstance(text_content, list):
                     text_content = ' '.join(str(item) for item in text_content)
                 elif not isinstance(text_content, str):
                     text_content = str(text_content)
                 
-                # Get vector embedding
+                
                 vector_embedding = similarity_detector.get_text_embedding(text_content)
                 
-                # Create document for MongoDB
+                
                 document = Document(
-                    user_id=PyObjectId(),  # Placeholder until user system is implemented
+                    user_id=PyObjectId(),  
                     filename=file.filename,
-                    content=text_content,  # The actual text content
-                    content_vector=vector_embedding.tolist(),  # Vector embedding for similarity search
+                    content=text_content,  
+                    content_vector=vector_embedding.tolist(),  
                     file_type=file.filename.split('.')[-1],
-                    processed_text=text_content  # Same as content for now
+                    processed_text=text_content  
                 )
                 
-                # Save to MongoDB
+                
                 db = await get_async_db()
                 db_ops = DatabaseOperations(db)
                 doc_id = await db_ops.create_document(document)
                 
-                # Redirect to similarity results page
+                
                 return jsonify({
                     'status': 'success',
                     'message': 'File uploaded and processed successfully',
@@ -116,7 +116,7 @@ def init_routes(app):
                     'traceback': traceback.format_exc(),
                     'processed_result_type': str(type(processed_result)),
                     'processed_result_preview': str(processed_result)[:200],
-                    'current_dir': os.getcwd()  # For debugging
+                    'current_dir': os.getcwd()  
                 }), 500
 
                 
@@ -126,11 +126,11 @@ def init_routes(app):
     @app.route('/check-similarity/<doc_id>', methods=['GET'])
     async def check_similarity(doc_id):
         try:
-            # Get database connection
+            
             db = await get_async_db()
             db_ops = DatabaseOperations(db)
             
-            # Get the target document from MongoDB
+            
             target_doc = await db_ops.get_document(doc_id)
             if not target_doc:
                 return jsonify({
@@ -138,20 +138,20 @@ def init_routes(app):
                     'message': 'Document not found'
                 }), 404
 
-            # Get similar documents using vector search
+            
             similar_docs = await db_ops.find_similar_documents(
                 vector=target_doc['content_vector'],
-                threshold=0.3  # Lower threshold for initial search
+                threshold=0.3  
             )
             
-            # Filter out the target document itself
+            
             similar_docs = [doc for doc in similar_docs if str(doc['_id']) != doc_id]
             
             if similar_docs:
-                # Compare target document with the most similar one
+                
                 similarity_data = similarity_detector.analyze_similarity(
-                    target_doc['content'],  # Source document
-                    similar_docs[0]['content']  # Most similar document
+                    target_doc['content'],  
+                    similar_docs[0]['content']  
                 )
                 print(similarity_data)
                 
@@ -173,7 +173,7 @@ def init_routes(app):
                         'filename': doc['filename'],
                         'score': similarity_data['similarity_score'],
                         'matched_segments': similarity_data.get('matched_segments', [])
-                    } for doc in similar_docs[:5]]  # Return top 5 similar documents
+                    } for doc in similar_docs[:5]]  
                 }
             else:
                 similarity_result = {
@@ -194,7 +194,7 @@ def init_routes(app):
                     'similar_documents': []
                 }
 
-            # Fixed the template rendering syntax
+            
             return render_template(
                 'similarity_results.html',
                 target_document={
@@ -215,11 +215,11 @@ def init_routes(app):
     @app.route('/generate-report/<doc_id>', methods=['GET'])
     async def generate_report(doc_id):
         try:
-            # Get database connection
+            
             db = await get_async_db()
             db_ops = DatabaseOperations(db)
             
-            # Get the target document from MongoDB
+            
             target_doc = await db_ops.get_document(doc_id)
             if not target_doc:
                 return jsonify({
@@ -227,23 +227,23 @@ def init_routes(app):
                     'message': 'Document not found'
                 }), 404
 
-            # Get similar documents
+            
             similar_docs = await db_ops.find_similar_documents(
                 vector=target_doc['content_vector'],
                 threshold=0.3
             )
             
-            # Filter out the target document itself
+            
             similar_docs = [doc for doc in similar_docs if str(doc['_id']) != doc_id]
 
             if similar_docs:
-                # Get similarity results
+                
                 similarity_data = similarity_detector.analyze_similarity(
-                    target_doc['content'],  # Source document
-                    similar_docs[0]['content']  # Most similar document
+                    target_doc['content'],  
+                    similar_docs[0]['content']  
                 )
 
-                # Generate report
+                
                 report_generator = ReportGenerator()
                 report = report_generator.generate_report(
                     document_info={
@@ -268,12 +268,12 @@ def init_routes(app):
                     }
                 )
 
-                # Get the HTML report path and convert it to a URL
+                
                 html_path = report['html_path']
                 report_filename = os.path.basename(html_path)
                 report_url = f"/reports/html/{report_filename}"
 
-                # Redirect to the HTML report
+                
                 return redirect(report_url)
 
             else:
@@ -285,7 +285,7 @@ def init_routes(app):
             flash(f'Error generating report: {str(e)}', 'error')
             return redirect(url_for('check_similarity', doc_id=doc_id))
 
-    # Update the serve_report route to use absolute paths
+    
     @app.route('/reports/<type>/<filename>')
     def serve_report(type, filename):
         """Serve report files from the reports directory"""
@@ -296,7 +296,7 @@ def init_routes(app):
             }), 400
             
         try:
-            # Get the absolute path to the reports directory
+            
             reports_dir = os.path.abspath(os.path.join(
                 os.path.dirname(__file__), 
                 '..', 
@@ -317,10 +317,10 @@ def init_routes(app):
             db = await get_async_db()
             db_ops = DatabaseOperations(db)
             
-            # Get vector info
+            
             await db_ops.print_vector_info()
             
-            # Get sample documents
+            
             docs = await db_ops.get_document_vectors()
             
             return jsonify({

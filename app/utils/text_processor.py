@@ -8,7 +8,7 @@ from nltk.stem import WordNetLemmatizer
 import string
 import re
 
-# Download required NLTK data
+
 nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')
@@ -33,7 +33,7 @@ class TextProcessor:
     
     def preprocess_text(self, text):
         """Main preprocessing pipeline"""
-        # Detect language
+        
         try:
             language = detect(text)
             if language != 'en':
@@ -41,13 +41,13 @@ class TextProcessor:
         except:
             raise ValueError("Language detection failed")
         
-        # Convert to lowercase
+        
         text = text.lower()
         
-        # Tokenize into sentences
+        
         sentences = sent_tokenize(text)
         
-        # Process each sentence
+        
         processed_sentences = []
         for sentence in sentences:
             processed_sentence = self._process_sentence(sentence)
@@ -58,14 +58,14 @@ class TextProcessor:
     
     def _process_sentence(self, sentence):
         """Process individual sentences"""
-        # Remove special characters and numbers
+        
         sentence = re.sub(r'[^\w\s]', '', sentence)
         sentence = re.sub(r'\d+', '', sentence)
         
-        # Tokenize words
+        
         words = word_tokenize(sentence)
         
-        # Remove stopwords and lemmatize
+        
         processed_words = []
         for word in words:
             if word not in self.stopwords and len(word) > 2:
