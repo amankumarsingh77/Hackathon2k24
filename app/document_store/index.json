@@ -535,5 +535,255 @@
             "total_sentences": 14
         },
         "file_path": "62566b66-9eb2-40d1-a4b3-da89604c03c0.json"
+    },
+    "cb132363-ed7f-477f-bb71-ec755452b0cb": {
+        "id": "cb132363-ed7f-477f-bb71-ec755452b0cb",
+        "added_at": "2024-11-02T19:45:46.307915",
+        "metadata": {
+            "original_file": "app/uploads/20241102_194544_1_Lab_Skill_Workbook_PFSD.pdf",
+            "processed_at": "2024-11-02T19:45:46.307196",
+            "total_sentences": 14
+        },
+        "file_path": "cb132363-ed7f-477f-bb71-ec755452b0cb.json"
+    },
+    "a2da99fb-21ef-4bc2-a677-173492867e67": {
+        "id": "a2da99fb-21ef-4bc2-a677-173492867e67",
+        "added_at": "2024-11-02T20:59:14.363274",
+        "metadata": {
+            "original_file": "app/uploads/20241102_205913_2_Lab_Skill_Workbook_PFSD_1.pdf",
+            "processed_at": "2024-11-02T20:59:14.362811",
+            "total_sentences": 23
+        },
+        "file_path": "a2da99fb-21ef-4bc2-a677-173492867e67.json"
+    },
+    "4b56d981-218d-4497-bd3f-1bbec8acdfd8": {
+        "id": "4b56d981-218d-4497-bd3f-1bbec8acdfd8",
+        "added_at": "2024-11-02T21:09:31.093960",
+        "metadata": {
+            "original_file": "app/uploads/20241102_210930_1_Lab_Skill_Workbook_PFSD.pdf",
+            "processed_at": "2024-11-02T21:09:31.093275",
+            "total_sentences": 14
+        },
+        "file_path": "4b56d981-218d-4497-bd3f-1bbec8acdfd8.json"
+    },
+    "046e0f6d-fb68-4ea2-b390-17fcca95059e": {
+        "id": "046e0f6d-fb68-4ea2-b390-17fcca95059e",
+        "added_at": "2024-11-02T21:09:50.304375",
+        "metadata": {
+            "original_file": "app/uploads/20241102_210950_5_6109207343491190756.pdf",
+            "processed_at": "2024-11-02T21:09:50.303851",
+            "total_sentences": 18
+        },
+        "file_path": "046e0f6d-fb68-4ea2-b390-17fcca95059e.json"
+    },
+    "1884485a-5c6c-4617-8409-4d7a4191209a": {
+        "id": "1884485a-5c6c-4617-8409-4d7a4191209a",
+        "added_at": "2024-11-02T21:10:17.793870",
+        "metadata": {
+            "original_file": "app/uploads/20241102_211017_ai_research_paper-akfinal.pdf",
+            "processed_at": "2024-11-02T21:10:17.793468",
+            "total_sentences": 102
+        },
+        "file_path": "1884485a-5c6c-4617-8409-4d7a4191209a.json"
+    },
+    "9b10e204-7664-487c-a2a5-15aedbc3503d": {
+        "id": "9b10e204-7664-487c-a2a5-15aedbc3503d",
+        "added_at": "2024-11-02T21:11:06.743784",
+        "metadata": {
+            "original_file": "app/uploads/20241102_211106_5_6156932418788920114.pdf",
+            "processed_at": "2024-11-02T21:11:06.743374",
+            "total_sentences": 29
+        },
+        "file_path": "9b10e204-7664-487c-a2a5-15aedbc3503d.json"
+    },
+    "a5bca300-0174-4980-aca5-4acf54286d17": {
+        "id": "a5bca300-0174-4980-aca5-4acf54286d17",
+        "added_at": "2024-11-02T21:15:09.750591",
+        "metadata": {
+            "original_file": "app/uploads/20241102_211507_5_6156700490554937142.pdf",
+            "processed_at": "2024-11-02T21:15:09.749468",
+            "total_sentences": 529
+        },
+        "file_path": "a5bca300-0174-4980-aca5-4acf54286d17.json"
+    },
+    "775dae81-1d5f-454f-9878-5bd6dca0149e": {
+        "id": "775dae81-1d5f-454f-9878-5bd6dca0149e",
+        "added_at": "2024-11-02T21:15:21.455406",
+        "metadata": {
+            "original_file": "app/uploads/20241102_211520_5_6156700490554937142.pdf",
+            "processed_at": "2024-11-02T21:15:21.454997",
+            "total_sentences": 529
+        },
+        "file_path": "775dae81-1d5f-454f-9878-5bd6dca0149e.json"
+    },
+    "98d35e4c-6107-4de3-b36c-04f84c7477fb": {
+        "id": "98d35e4c-6107-4de3-b36c-04f84c7477fb",
+        "added_at": "2024-11-02T21:16:59.229539",
+        "metadata": {
+            "original_file": "app/uploads/20241102_211658_2_Lab_Skill_Workbook_PFSD.pdf",
+            "processed_at": "2024-11-02T21:16:59.229006",
+            "total_sentences": 23
+        },
+        "file_path": "98d35e4c-6107-4de3-b36c-04f84c7477fb.json"
+    },
+    "47c7af68-a658-48c1-9289-ee118d0e7afc": {
+        "id": "47c7af68-a658-48c1-9289-ee118d0e7afc",
+        "added_at": "2024-11-02T21:21:33.858204",
+        "metadata": {
+            "original_file": "app/uploads/20241102_212132_2_Lab_Skill_Workbook_PFSD_1.pdf",
+            "processed_at": "2024-11-02T21:21:33.857779",
+            "total_sentences": 23
+        },
+        "file_path": "47c7af68-a658-48c1-9289-ee118d0e7afc.json"
+    },
+    "ee60bb13-ab48-4e59-9491-b1ab3c6e2c62": {
+        "id": "ee60bb13-ab48-4e59-9491-b1ab3c6e2c62",
+        "added_at": "2024-11-02T21:25:07.591118",
+        "metadata": {
+            "original_file": "app/uploads/20241102_212506_1_Lab_Skill_Workbook_PFSD.pdf",
+            "processed_at": "2024-11-02T21:25:07.590653",
+            "total_sentences": 14
+        },
+        "file_path": "ee60bb13-ab48-4e59-9491-b1ab3c6e2c62.json"
+    },
+    "7f17a4ce-f136-4ac4-bdde-a72900996c8e": {
+        "id": "7f17a4ce-f136-4ac4-bdde-a72900996c8e",
+        "added_at": "2024-11-02T21:27:08.360083",
+        "metadata": {
+            "original_file": "app/uploads/20241102_212707_2_Lab_Skill_Workbook_PFSD_1.pdf",
+            "processed_at": "2024-11-02T21:27:08.359608",
+            "total_sentences": 23
+        },
+        "file_path": "7f17a4ce-f136-4ac4-bdde-a72900996c8e.json"
+    },
+    "1fc275a1-f7d6-4cec-b167-9b1ae9daea57": {
+        "id": "1fc275a1-f7d6-4cec-b167-9b1ae9daea57",
+        "added_at": "2024-11-02T21:29:18.432788",
+        "metadata": {
+            "original_file": "app/uploads/20241102_212917_1_Lab_Skill_Workbook_PFSD.pdf",
+            "processed_at": "2024-11-02T21:29:18.432325",
+            "total_sentences": 14
+        },
+        "file_path": "1fc275a1-f7d6-4cec-b167-9b1ae9daea57.json"
+    },
+    "83e3aa9c-1c23-45ef-9551-908eb9eee369": {
+        "id": "83e3aa9c-1c23-45ef-9551-908eb9eee369",
+        "added_at": "2024-11-02T21:30:20.226211",
+        "metadata": {
+            "original_file": "app/uploads/20241102_213019_2_Lab_Skill_Workbook_PFSD.pdf",
+            "processed_at": "2024-11-02T21:30:20.225719",
+            "total_sentences": 23
+        },
+        "file_path": "83e3aa9c-1c23-45ef-9551-908eb9eee369.json"
+    },
+    "9efdd51a-40bd-439b-b19e-e3cdceb4c1ca": {
+        "id": "9efdd51a-40bd-439b-b19e-e3cdceb4c1ca",
+        "added_at": "2024-11-02T21:34:33.528937",
+        "metadata": {
+            "original_file": "app/uploads/20241102_213432_1_Lab_Skill_Workbook_PFSD.pdf",
+            "processed_at": "2024-11-02T21:34:33.528455",
+            "total_sentences": 14
+        },
+        "file_path": "9efdd51a-40bd-439b-b19e-e3cdceb4c1ca.json"
+    },
+    "15ec1cf6-eeb2-49d7-8085-e264cb091eed": {
+        "id": "15ec1cf6-eeb2-49d7-8085-e264cb091eed",
+        "added_at": "2024-11-02T21:34:54.153743",
+        "metadata": {
+            "original_file": "app/uploads/20241102_213454_5_6186070791184976699.txt",
+            "processed_at": "2024-11-02T21:34:54.153292",
+            "total_sentences": 105
+        },
+        "file_path": "15ec1cf6-eeb2-49d7-8085-e264cb091eed.json"
+    },
+    "cafefea0-9649-47cd-9502-8ab8d92e5b66": {
+        "id": "cafefea0-9649-47cd-9502-8ab8d92e5b66",
+        "added_at": "2024-11-02T21:35:07.083073",
+        "metadata": {
+            "original_file": "app/uploads/20241102_213506_29._Hierarchical_Clustering.pdf",
+            "processed_at": "2024-11-02T21:35:07.082691",
+            "total_sentences": 18
+        },
+        "file_path": "cafefea0-9649-47cd-9502-8ab8d92e5b66.json"
+    },
+    "3b68fe4e-7614-43d5-ae2c-edb93cffdaf3": {
+        "id": "3b68fe4e-7614-43d5-ae2c-edb93cffdaf3",
+        "added_at": "2024-11-02T21:36:07.607752",
+        "metadata": {
+            "original_file": "app/uploads/20241102_213607_2210030344.pdf",
+            "processed_at": "2024-11-02T21:36:07.607047",
+            "total_sentences": 1
+        },
+        "file_path": "3b68fe4e-7614-43d5-ae2c-edb93cffdaf3.json"
+    },
+    "7ee05343-17c4-419a-8a47-ede34877db3a": {
+        "id": "7ee05343-17c4-419a-8a47-ede34877db3a",
+        "added_at": "2024-11-02T21:36:31.409402",
+        "metadata": {
+            "original_file": "app/uploads/20241102_213631_22SDCS01P.pdf",
+            "processed_at": "2024-11-02T21:36:31.407801",
+            "total_sentences": 46
+        },
+        "file_path": "7ee05343-17c4-419a-8a47-ede34877db3a.json"
+    },
+    "b26b3495-4d6c-44d3-aeed-362384c4ec57": {
+        "id": "b26b3495-4d6c-44d3-aeed-362384c4ec57",
+        "added_at": "2024-11-02T21:36:46.889155",
+        "metadata": {
+            "original_file": "app/uploads/20241102_213646_1_Lab_Skill_Workbook_PFSD.pdf",
+            "processed_at": "2024-11-02T21:36:46.888720",
+            "total_sentences": 14
+        },
+        "file_path": "b26b3495-4d6c-44d3-aeed-362384c4ec57.json"
+    },
+    "d4499c96-aabc-43ae-8ec0-537d61745c9a": {
+        "id": "d4499c96-aabc-43ae-8ec0-537d61745c9a",
+        "added_at": "2024-11-02T21:46:07.700335",
+        "metadata": {
+            "original_file": "app/uploads/20241102_214607_ContCommRTD_A_Distributed_Content-Based_Misinforma.pdf",
+            "processed_at": "2024-11-02T21:46:07.699199",
+            "total_sentences": 511
+        },
+        "file_path": "d4499c96-aabc-43ae-8ec0-537d61745c9a.json"
+    },
+    "940df79d-54a7-4989-ba57-4ce6b68ae449": {
+        "id": "940df79d-54a7-4989-ba57-4ce6b68ae449",
+        "added_at": "2024-11-02T21:58:53.999691",
+        "metadata": {
+            "original_file": "app/uploads/20241102_215852_1_Lab_Skill_Workbook_PFSD.pdf",
+            "processed_at": "2024-11-02T21:58:53.999142",
+            "total_sentences": 14
+        },
+        "file_path": "940df79d-54a7-4989-ba57-4ce6b68ae449.json"
+    },
+    "c20692dd-3403-4b5c-9f88-5caf7a6d7051": {
+        "id": "c20692dd-3403-4b5c-9f88-5caf7a6d7051",
+        "added_at": "2024-11-03T00:16:26.094516",
+        "metadata": {
+            "original_file": "app/uploads/20241103_001625_2_Lab_Skill_Workbook_PFSD_1.pdf",
+            "processed_at": "2024-11-03T00:16:26.093146",
+            "total_sentences": 23
+        },
+        "file_path": "c20692dd-3403-4b5c-9f88-5caf7a6d7051.json"
+    },
+    "dca4215a-ea45-4002-8e5f-bef08a469630": {
+        "id": "dca4215a-ea45-4002-8e5f-bef08a469630",
+        "added_at": "2024-11-03T00:18:37.354772",
+        "metadata": {
+            "original_file": "app/uploads/20241103_001836_5_6258035343346372225.pdf",
+            "processed_at": "2024-11-03T00:18:37.354271",
+            "total_sentences": 124
+        },
+        "file_path": "dca4215a-ea45-4002-8e5f-bef08a469630.json"
+    },
+    "af1d7373-0258-41b6-8b99-d245506820b1": {
+        "id": "af1d7373-0258-41b6-8b99-d245506820b1",
+        "added_at": "2024-11-03T00:18:56.313502",
+        "metadata": {
+            "original_file": "app/uploads/20241103_001856_5_6149841041236167709.pdf",
+            "processed_at": "2024-11-03T00:18:56.313003",
+            "total_sentences": 94
+        },
+        "file_path": "af1d7373-0258-41b6-8b99-d245506820b1.json"
     }
 }

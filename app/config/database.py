@@ -24,14 +24,25 @@ def setup_indexes():
     db = get_sync_db()
     
     # Create vector search index for documents
-    db.documents.create_index([
-        ("content_vector", "vectorSearch")
-    ], {
-        "vectorSearchOptions": {
-            "numDimensions": 768,  # For BERT embeddings
-            "similarity": "cosine"
-        }
-    })
+    try:
+        db.command({
+            "createSearchIndex": "documents",
+            "name": "vector_index",
+            "definition": {
+                "mappings": {
+                    "dynamic": True,
+                    "fields": {
+                        "content_vector": {
+                            "dimensions": 384,
+                            "similarity": "cosine",
+                            "type": "knnVector"
+                        }
+                    }
+                }
+            }
+        })
+    except Exception as e:
+        print(f"Warning: Could not create vector index: {str(e)}")
 
     # Create regular indexes
     db.users.create_index("email", unique=True)

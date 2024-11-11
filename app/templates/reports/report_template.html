@@ -6,84 +6,173 @@
     <title>Plagiarism Detection Report</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .highlight-exact { background-color: #ffcdd2; }
-        .highlight-semantic { background-color: #fff9c4; }
-        .similarity-chart { max-width: 100%; height: auto; }
-        .match-pair { border: 1px solid #ddd; padding: 15px; margin: 10px 0; }
+        .report-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .chart-container {
+            margin: 2rem 0;
+            text-align: center;
+        }
+        .chart-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        .similarity-score {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .matched-text {
+            background-color: #fff3cd;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
-    <div class="container my-5">
-        <h1 class="mb-4">Plagiarism Detection Report</h1>
-        
+    <div class="report-container">
+        <h1 class="text-center mb-4">Plagiarism Detection Report</h1>
+
         <!-- Document Information -->
-        <section class="mb-5">
-            <h2>Document Information</h2>
-            <table class="table">
-                <tr>
-                    <th>Document Name:</th>
-                    <td>{{ document.name }}</td>
-                </tr>
-                <tr>
-                    <th>Analysis Date:</th>
-                    <td>{{ generated_at }}</td>
-                </tr>
-                <tr>
-                    <th>Overall Similarity Score:</th>
-                    <td>{{ "%.2f"|format(similarity.overall_similarity * 100) }}%</td>
-                </tr>
-            </table>
-        </section>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">Document Information</h4>
+                <p><strong>Document Name:</strong> {{ document.name }}</p>
+                <p><strong>File Type:</strong> {{ document.file_type }}</p>
+                <p><strong>Analysis Date:</strong> {{ generated_at }}</p>
+            </div>
+        </div>
 
-        <!-- Similarity Visualization -->
-        <section class="mb-5">
-            <h2>Similarity Analysis</h2>
-            <img src="data:image/png;base64,{{ charts.similarity_distribution }}" 
-                 alt="Similarity Distribution" 
-                 class="similarity-chart">
-        </section>
-
-        <!-- Matched Passages -->
-        <section class="mb-5">
-            <h2>Similar Passages</h2>
-            {% for match in highlighted_text %}
-            <div class="match-pair">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5>Source Text</h5>
-                        <p class="highlight-{{ match.type }}">{{ match.source }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h5>Similar Text</h5>
-                        <p class="highlight-{{ match.type }}">{{ match.target }}</p>
-                    </div>
+        <!-- Similarity Scores -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">Similarity Analysis</h4>
+                <div class="similarity-score">
+                    Overall Similarity: {{ "%.1f"|format(similarity.overall_similarity * 100) }}%
                 </div>
-                <div class="text-end">
-                    <small>Similarity: {{ "%.2f"|format(match.similarity * 100) }}%</small>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <h5>Sentence Similarity</h5>
+                        <p>{{ "%.1f"|format(similarity.sentence_similarity * 100) }}%</p>
+                    </div>
+                    <div class="stat-item">
+                        <h5>Document Similarity</h5>
+                        <p>{{ "%.1f"|format(similarity.document_similarity * 100) }}%</p>
+                    </div>
+                    <div class="stat-item">
+                        <h5>TF-IDF Similarity</h5>
+                        <p>{{ "%.1f"|format(similarity.tfidf_similarity * 100) }}%</p>
+                    </div>
                 </div>
             </div>
-            {% endfor %}
-        </section>
+        </div>
 
-        <!-- Web Sources -->
-        {% if web_sources %}
-        <section class="mb-5">
-            <h2>Web Sources</h2>
-            <div class="row">
-                {% for source in web_sources %}
-                <div class="col-md-6 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ source.title }}</h5>
-                            <p class="card-text">{{ source.snippet }}</p>
-                            <a href="{{ source.url }}" class="btn btn-primary" target="_blank">View Source</a>
+        <!-- Similarity Distribution Chart -->
+        {% if charts.similarity_distribution %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">Similarity Distribution</h4>
+                <div class="chart-container">
+                    <img src="data:image/png;base64,{{ charts.similarity_distribution }}" 
+                         alt="Similarity Distribution Chart">
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Similarity Breakdown -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">Similarity Breakdown</h4>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <h6>Exact Matches</h6>
+                            <p>{{ similarity.similarity_breakdown.exact_matches }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <h6>High Similarity</h6>
+                            <p>{{ similarity.similarity_breakdown.high_similarity }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <h6>Moderate Similarity</h6>
+                            <p>{{ similarity.similarity_breakdown.moderate_similarity }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <h6>Low Similarity</h6>
+                            <p>{{ similarity.similarity_breakdown.low_similarity }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Matched Text Segments -->
+        {% if highlighted_text %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">Matched Text Segments</h4>
+                {% for match in highlighted_text %}
+                <div class="matched-text">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Original Text:</h6>
+                            <p>{{ match.source }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Similar Text:</h6>
+                            <p>{{ match.target }}</p>
+                            <small class="text-muted">Similarity: {{ "%.1f"|format(match.similarity * 100) }}%</small>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-        </section>
+        </div>
+        {% endif %}
+
+        <!-- Similar Documents -->
+        {% if similarity.similar_documents %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">Similar Documents</h4>
+                {% for doc in similarity.similar_documents %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ doc.filename }}</h5>
+                        <p class="mb-1">Document ID: {{ doc.id }}</p>
+                        <p class="mb-0">Similarity Score: {{ "%.1f"|format(doc.score) }}%</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
         {% endif %}
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html> 

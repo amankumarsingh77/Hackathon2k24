@@ -119,7 +119,7 @@
             </div>
 
             <!-- Overall Score -->
-            {% set score = similarity_result.similarity_data.overall_similarity * 100 %}
+            {% set score = similarity_result.similarity_data.similarity_score %}
             <div class="score-card {% if score < 30 %}low{% elif score < 70 %}medium{% else %}high{% endif %}">
                 <h4>Overall Similarity Score</h4>
                 <div class="score-value">{{ "%.1f"|format(score) }}%</div>
@@ -138,18 +138,51 @@
             <div class="stats-grid">
                 <div class="stat-item">
                     <i class="bi bi-graph-up mb-2" style="font-size: 1.5rem;"></i>
-                    <h5>Semantic Similarity</h5>
-                    <p class="mb-0">{{ "%.1f"|format(similarity_result.similarity_data.semantic_similarity * 100) }}%</p>
+                    <h5>Sentence Similarity</h5>
+                    <p class="mb-0">{{ "%.1f"|format(similarity_result.similarity_data.sentence_similarity * 100) }}%</p>
                 </div>
                 <div class="stat-item">
                     <i class="bi bi-intersect mb-2" style="font-size: 1.5rem;"></i>
-                    <h5>Content Overlap</h5>
-                    <p class="mb-0">{{ "%.1f"|format(similarity_result.similarity_data.cosine_similarity * 100) }}%</p>
+                    <h5>Document Similarity</h5>
+                    <p class="mb-0">{{ "%.1f"|format(similarity_result.similarity_data.document_similarity * 100) }}%</p>
                 </div>
                 <div class="stat-item">
                     <i class="bi bi-file-text mb-2" style="font-size: 1.5rem;"></i>
-                    <h5>Similar Documents</h5>
-                    <p class="mb-0">{{ similarity_result.similar_documents|length }}</p>
+                    <h5>TF-IDF Similarity</h5>
+                    <p class="mb-0">{{ "%.1f"|format(similarity_result.similarity_data.tfidf_similarity * 100) }}%</p>
+                </div>
+            </div>
+
+            <!-- Similarity Breakdown -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Similarity Breakdown</h5>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h6>Exact Matches</h6>
+                                <p>{{ similarity_result.similarity_data.similarity_breakdown.exact_matches }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h6>High Similarity</h6>
+                                <p>{{ similarity_result.similarity_data.similarity_breakdown.high_similarity }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h6>Moderate Similarity</h6>
+                                <p>{{ similarity_result.similarity_data.similarity_breakdown.moderate_similarity }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h6>Low Similarity</h6>
+                                <p>{{ similarity_result.similarity_data.similarity_breakdown.low_similarity }}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -162,26 +195,29 @@
                         <h5 class="mb-2">{{ doc.filename }}</h5>
                         <p class="text-muted mb-2">Document ID: {{ doc.id }}</p>
                     </div>
-                    <span class="badge bg-primary">{{ "%.1f"|format(doc.score * 100) }}% Match</span>
+                    <span class="badge bg-primary">{{ "%.1f"|format(doc.score) }}% Match</span>
                 </div>
                 
                 <div class="similarity-bar">
-                    <div class="similarity-fill bg-primary" style="width: {{ doc.score * 100 }}%"></div>
+                    <div class="similarity-fill bg-primary" style="width: {{ doc.score }}%"></div>
                 </div>
                 
                 {% if doc.matched_segments %}
                 <div class="text-comparison">
                     <h6>Sample Matched Content:</h6>
-                    <div class="row">
+                    {% for segment in doc.matched_segments[:3] %}
+                    <div class="row mb-3">
                         <div class="col-md-6">
                             <small class="text-muted">Original Text:</small>
-                            <p class="highlight">{{ doc.matched_segments[0].source_text }}</p>
+                            <p class="highlight">{{ segment.source_text }}</p>
                         </div>
                         <div class="col-md-6">
                             <small class="text-muted">Similar Text:</small>
-                            <p class="highlight">{{ doc.matched_segments[0].matched_text }}</p>
+                            <p class="highlight">{{ segment.matched_text }}</p>
+                            <small class="text-muted">Similarity: {{ "%.1f"|format(segment.similarity * 100) }}%</small>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
                 {% endif %}
             </div>

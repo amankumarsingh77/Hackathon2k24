@@ -1,4 +1,4 @@
-from flask import render_template, request, flash, redirect, url_for, jsonify
+from flask import render_template, request, flash, redirect, url_for, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 from app.utils.file_handler import FileHandler
 from app.utils.similarity_detector import SimilarityDetector
@@ -10,6 +10,7 @@ from app.models.models import Document, PyObjectId
 import asyncio
 import os
 from datetime import datetime
+import logging
 
 file_handler = FileHandler()
 document_store = DocumentStore()
@@ -117,6 +118,8 @@ def init_routes(app):
                     'processed_result_preview': str(processed_result)[:200],
                     'current_dir': os.getcwd()  # For debugging
                 }), 500
+
+                
         
         return render_template('upload.html')
 
@@ -138,7 +141,7 @@ def init_routes(app):
             # Get similar documents using vector search
             similar_docs = await db_ops.find_similar_documents(
                 vector=target_doc['content_vector'],
-                threshold=0.8  # Configurable similarity threshold
+                threshold=0.3  # Lower threshold for initial search
             )
             
             # Filter out the target document itself
@@ -146,102 +149,166 @@ def init_routes(app):
             
             if similar_docs:
                 # Compare target document with the most similar one
-                result = similarity_detector.analyze_similarity(
+                similarity_data = similarity_detector.analyze_similarity(
                     target_doc['content'],  # Source document
                     similar_docs[0]['content']  # Most similar document
                 )
+                print(similarity_data)
                 
                 similarity_result = {
                     'document_id': str(similar_docs[0]['_id']),
                     'filename': similar_docs[0]['filename'],
-                    'similarity_data': result,
-                    'similarity_score': similar_docs[0].get('score', 0),
+                    'similarity_data': {
+                        'overall_similarity': similarity_data['overall_similarity'],
+                        'similarity_score': similarity_data['similarity_score'],
+                        'sentence_similarity': similarity_data['sentence_similarity'],
+                        'tfidf_similarity': similarity_data['tfidf_similarity'],
+                        'document_similarity': similarity_data['document_similarity'],
+                        'similarity_breakdown': similarity_data['similarity_breakdown']
+                    },
+                    'similarity_score': similarity_data['similarity_score'],
                     'created_at': datetime.utcnow(),
                     'similar_documents': [{
                         'id': str(doc['_id']),
                         'filename': doc['filename'],
-                        'score': doc.get('score', 0),
-                        'matched_segments': result.get('matched_segments', [])
+                        'score': similarity_data['similarity_score'],
+                        'matched_segments': similarity_data.get('matched_segments', [])
                     } for doc in similar_docs[:5]]  # Return top 5 similar documents
                 }
             else:
                 similarity_result = {
                     'similarity_data': {
                         'overall_similarity': 0,
-                        'semantic_similarity': 0,
-                        'cosine_similarity': 0
+                        'similarity_score': 0,
+                        'sentence_similarity': 0,
+                        'tfidf_similarity': 0,
+                        'document_similarity': 0,
+                        'similarity_breakdown': {
+                            'exact_matches': 0,
+                            'high_similarity': 0,
+                            'moderate_similarity': 0,
+                            'low_similarity': 0
+                        }
                     },
                     'created_at': datetime.utcnow(),
                     'similar_documents': []
                 }
 
-            return render_template('similarity_results.html',
-                                target_document={
-                                    'id': str(target_doc['_id']),
-                                    'filename': target_doc['filename'],
-                                    'file_type': target_doc['file_type']
-                                },
-                                similarity_result=similarity_result)
+            # Fixed the template rendering syntax
+            return render_template(
+                'similarity_results.html',
+                target_document={
+                    'id': str(target_doc['_id']),
+                    'filename': target_doc['filename'],
+                    'file_type': target_doc['file_type']
+                },
+                similarity_result=similarity_result
+            )
 
         except Exception as e:
-            import traceback
+            logging.error(f"Error in check_similarity: {str(e)}")
             return jsonify({
                 'status': 'error',
-                'message': str(e),
-                'traceback': traceback.format_exc()
+                'message': str(e)
             }), 500
 
     @app.route('/generate-report/<doc_id>', methods=['GET'])
-    def generate_report(doc_id):
+    async def generate_report(doc_id):
         try:
-            # Get document and similarity data
-            target_doc = document_store.get_document(doc_id)
+            # Get database connection
+            db = await get_async_db()
+            db_ops = DatabaseOperations(db)
+            
+            # Get the target document from MongoDB
+            target_doc = await db_ops.get_document(doc_id)
             if not target_doc:
                 return jsonify({
                     'status': 'error',
                     'message': 'Document not found'
                 }), 404
 
-            # Get all other documents
-            other_docs = [doc for doc in document_store.get_all_documents() 
-                         if doc['id'] != doc_id]
+            # Get similar documents
+            similar_docs = await db_ops.find_similar_documents(
+                vector=target_doc['content_vector'],
+                threshold=0.3
+            )
+            
+            # Filter out the target document itself
+            similar_docs = [doc for doc in similar_docs if str(doc['_id']) != doc_id]
 
-            if other_docs:
-                # Join sentences into a single string for comparison
-                target_text = ' '.join(target_doc['content'])
-                comparison_text = ' '.join(other_docs[0]['content'])  # Compare with most recent doc
-
+            if similar_docs:
                 # Get similarity results
-                similarity_result = similarity_detector.analyze_similarity(
-                    [target_text],  # Pass as a list of one string
-                    [comparison_text]  # Pass as a list of one string
+                similarity_data = similarity_detector.analyze_similarity(
+                    target_doc['content'],  # Source document
+                    similar_docs[0]['content']  # Most similar document
                 )
 
                 # Generate report
                 report_generator = ReportGenerator()
                 report = report_generator.generate_report(
                     document_info={
-                        'id': target_doc['id'],
-                        'name': os.path.basename(target_doc['metadata']['original_file']),
-                        'processed_at': target_doc['added_at']
+                        'id': str(target_doc['_id']),
+                        'name': target_doc['filename'],
+                        'processed_at': target_doc.get('created_at', datetime.utcnow().isoformat()),
+                        'file_type': target_doc['file_type']
                     },
-                    similarity_data=similarity_result
+                    similarity_data={
+                        'overall_similarity': similarity_data['overall_similarity'],
+                        'similarity_score': similarity_data['similarity_score'],
+                        'sentence_similarity': similarity_data['sentence_similarity'],
+                        'tfidf_similarity': similarity_data['tfidf_similarity'],
+                        'document_similarity': similarity_data['document_similarity'],
+                        'similarity_breakdown': similarity_data['similarity_breakdown'],
+                        'matched_segments': similarity_data.get('matched_segments', []),
+                        'similar_documents': [{
+                            'id': str(doc['_id']),
+                            'filename': doc['filename'],
+                            'score': similarity_data['similarity_score']
+                        } for doc in similar_docs[:5]]
+                    }
                 )
 
-                return jsonify({
-                    'status': 'success',
-                    'report': report
-                })
+                # Get the HTML report path and convert it to a URL
+                html_path = report['html_path']
+                report_filename = os.path.basename(html_path)
+                report_url = f"/reports/html/{report_filename}"
+
+                # Redirect to the HTML report
+                return redirect(report_url)
+
             else:
-                return jsonify({
-                    'status': 'error',
-                    'message': 'No documents available for comparison'
-                }), 400
+                flash('No similar documents found for comparison', 'warning')
+                return redirect(url_for('check_similarity', doc_id=doc_id))
 
         except Exception as e:
+            logging.error(f"Error in generate_report: {str(e)}")
+            flash(f'Error generating report: {str(e)}', 'error')
+            return redirect(url_for('check_similarity', doc_id=doc_id))
+
+    # Update the serve_report route to use absolute paths
+    @app.route('/reports/<type>/<filename>')
+    def serve_report(type, filename):
+        """Serve report files from the reports directory"""
+        if type not in ['html', 'pdf']:
             return jsonify({
                 'status': 'error',
-                'message': str(e)
+                'message': 'Invalid report type'
+            }), 400
+            
+        try:
+            # Get the absolute path to the reports directory
+            reports_dir = os.path.abspath(os.path.join(
+                os.path.dirname(__file__), 
+                '..', 
+                'reports',
+                type
+            ))
+            return send_from_directory(reports_dir, filename)
+        except Exception as e:
+            logging.error(f"Error serving report: {str(e)}")
+            return jsonify({
+                'status': 'error',
+                'message': f'Error serving report: {str(e)}'
             }), 500
 
     @app.route('/debug/documents', methods=['GET'])
